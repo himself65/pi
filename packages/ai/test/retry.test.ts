@@ -60,6 +60,20 @@ describe("provider retry classification", () => {
 		expect(isRetryableAssistantError(fauxAssistantMessage("", { stopReason: "error", errorMessage }))).toBe(true);
 	});
 
+	it("matches an HTTP/2 pending-stream cancel with an empty cause", () => {
+		// Node ERR_HTTP2_STREAM_CANCEL with no cause message: the session died
+		// (e.g. server GOAWAY between two Bedrock ConverseStream calls) before
+		// the stream was dispatched, so nothing cause-specific is in the text.
+		expect(
+			isRetryableAssistantError(
+				fauxAssistantMessage("", {
+					stopReason: "error",
+					errorMessage: "The pending stream has been canceled (caused by: )",
+				}),
+			),
+		).toBe(true);
+	});
+
 	it("matches OpenAI Responses streams that end before terminal events", () => {
 		expect(
 			isRetryableAssistantError(

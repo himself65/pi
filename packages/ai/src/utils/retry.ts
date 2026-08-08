@@ -75,6 +75,14 @@ const RETRYABLE_PROVIDER_ERROR_PATTERN = buildProviderErrorPattern([
 	"stream ended before a terminal response event",
 	"http2 request did not get a response",
 
+	// Node ERR_HTTP2_STREAM_CANCEL: a pending HTTP/2 stream canceled because the
+	// session died first. #6904 covered the DNS-cause variant via "getaddrinfo"/
+	// "ENOTFOUND", but the cause can be empty — "The pending stream has been
+	// canceled (caused by: )" — when the SDK's cached session is closed by a
+	// server GOAWAY between two streaming calls (seen with Bedrock ConverseStream
+	// on NodeHttp2Handler). The stream never started, so retrying is always safe.
+	"pending stream has been canceled",
+
 	// Provider-requested retry delay cap failures should flow through the outer
 	// retry policy so callers can surface/abort the backoff (#1123).
 	"retry delay",
